@@ -25,6 +25,7 @@ public class Simon extends JPanel implements MouseListener{
 	boolean clickEnabled=false;
 	boolean started = false;
 	int currentLevel;
+	int clickProgress;
 	public static void main(String[] args) {
 		new Simon();
 	}
@@ -112,7 +113,18 @@ public class Simon extends JPanel implements MouseListener{
 		repaint();
 	}
 	void click(int loc) {
-
+		if(sequence[clickProgress]!=loc) {
+			System.exit(0);
+		} else {
+			clickProgress++;
+			System.out.println("current level: "+currentLevel+"\nclick progress: "+clickProgress);
+			if(clickProgress==currentLevel) {
+				//win this round
+				clickProgress=0;
+				currentLevel++;
+				showSequence(currentLevel);
+			}
+		}
 	}
 	void start() {
 		System.out.println("start");
@@ -120,10 +132,12 @@ public class Simon extends JPanel implements MouseListener{
 		for(int i = 0; i<31;i++) {
 			sequence[i]=new Random().nextInt(4)+1;
 		}
-		currentLevel=1;
+		currentLevel=3;
+		clickProgress=0;
 		showSequence(currentLevel);
 	}
 	void showSequence(int count) {
+		clickEnabled=false;
 		int[] i = {0};
 		boolean[] flashTime= {true};
 		Timer timer = new Timer(500,e->{
@@ -135,6 +149,7 @@ public class Simon extends JPanel implements MouseListener{
 			}
 			flashTime[0]=!flashTime[0];
 			if(i[0]>count-1) {
+				clickEnabled=true;
 				((Timer) e.getSource()).stop();
 			}
 			
@@ -184,9 +199,6 @@ public class Simon extends JPanel implements MouseListener{
 			return;
 		}
 		if(!clickEnabled) {
-			currentClick=0;
-			topLeft=topRight=bottomLeft=bottomRight=1;
-			repaint();
 			return;
 		}
 		// TODO Auto-generated method stub
