@@ -17,9 +17,9 @@ public class Simon extends JPanel implements MouseListener{
 	Integer[] sequence = new Integer[31];
 	JFrame frame;
 	Area greenButton, redButton, yellowButton, blueButton, sub;
-	int topLeft=1,topRight=1,bottomLeft=1,bottomRight=1;
+	int topLeft=0,topRight=0,bottomLeft=0,bottomRight=0;
 	//0 for dark(pressed), 1 for neutral, 2 for lit up
-	public static int WIDTH=600,HEIGHT=600;
+	public static int WIDTH=1000,HEIGHT=300;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
 	boolean clickEnabled=false;
@@ -114,10 +114,12 @@ public class Simon extends JPanel implements MouseListener{
 	}
 	void click(int loc) {
 		if(sequence[clickProgress]!=loc) {
-			System.exit(0);
+			topLeft=0;topRight=0;bottomLeft=0;bottomRight=0;
+			started=false;
+			clickEnabled=false;
+			repaint();
 		} else {
 			clickProgress++;
-			System.out.println("current level: "+currentLevel+"\nclick progress: "+clickProgress);
 			if(clickProgress==currentLevel) {
 				//win this round
 				clickProgress=0;
@@ -132,8 +134,10 @@ public class Simon extends JPanel implements MouseListener{
 		for(int i = 0; i<31;i++) {
 			sequence[i]=new Random().nextInt(4)+1;
 		}
-		currentLevel=3;
+		currentLevel=1;
 		clickProgress=0;
+		topLeft=topRight=bottomLeft=bottomRight=1;
+		repaint();
 		showSequence(currentLevel);
 	}
 	void showSequence(int count) {
@@ -206,6 +210,7 @@ public class Simon extends JPanel implements MouseListener{
 		if(currentClick!=0) {
 				click(currentClick);
 		}
+		if(!started) return;
 		//set currentclick to 0
 		currentClick=0;
 		topLeft=topRight=bottomLeft=bottomRight=1;
