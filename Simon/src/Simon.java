@@ -1,8 +1,10 @@
-import java.awt.Color;
+import java.awt.*;
+import java.awt.geom.*;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
@@ -10,9 +12,10 @@ import javax.swing.*;
 public class Simon extends JPanel implements MouseListener{
 
 	JFrame frame;
+	Area greenButton, redButton, yellowButton, blueButton, sub;
 	int topLeft=1,topRight=1,bottomLeft=1,bottomRight=1;
 	//0 for dark(pressed), 1 for neutral, 2 for lit up
-	public static int WIDTH=800,HEIGHT=800;
+	public static int WIDTH=600,HEIGHT=600;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
 	public static void main(String[] args) {
@@ -29,39 +32,49 @@ public class Simon extends JPanel implements MouseListener{
 		frame.setVisible(true);
 		frame.repaint();
 		
+	    Ellipse2D innerCircle = new Ellipse2D.Double(WIDTH*275/800, HEIGHT*275/800-20, WIDTH*250/800, HEIGHT*250/800);
+	    Rectangle2D vBar = new Rectangle2D.Double(WIDTH/2-10, HEIGHT*125/800-20,20, HEIGHT*550/800);
+	    Rectangle2D hBar=new Rectangle2D.Double(WIDTH*125/800, HEIGHT/2-30,WIDTH*550/800, 20);
+		
+	    sub = new Area(innerCircle);
+	    sub.add(new Area(vBar));
+	    sub.add(new Area(hBar));
+	    
+	    
+	    greenButton= new Area(new Arc2D.Double(WIDTH*125/800, HEIGHT*125/800-20, WIDTH*550/800, HEIGHT*550/800, 90, 90,Arc2D.PIE));
+	    redButton= new Area(new Arc2D.Double(WIDTH*125/800, HEIGHT*125/800-20, WIDTH*550/800, HEIGHT*550/800, 90, -90,Arc2D.PIE));
+	    yellowButton= new Area(new Arc2D.Double(WIDTH*125/800, HEIGHT*125/800-20, WIDTH*550/800, HEIGHT*550/800, 180, 90,Arc2D.PIE));
+	    blueButton= new Area(new Arc2D.Double(WIDTH*125/800, HEIGHT*125/800-20, WIDTH*550/800, HEIGHT*550/800, -90, 90,Arc2D.PIE));
+		
+	    greenButton.subtract(sub);
+	    redButton.subtract(sub);
+	    yellowButton.subtract(sub);
+	    blueButton.subtract(sub);
+	    
 		addMouseListener(this);
 	}
 	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+	public void paintComponent(Graphics g1) {
+		super.paintComponent(g1);
+		Graphics2D g = (Graphics2D) g1;
 		g.setColor(new Color(67,67,67));
 		g.fillOval(WIDTH/8, HEIGHT/8-20, WIDTH*3/4, HEIGHT*3/4);
 		
+		Color[][] colors = {{Color.green.darker().darker(),Color.green.darker(),Color.green},{Color.red.darker().darker(),Color.red.darker(),Color.red},{Color.yellow.darker().darker(),Color.yellow.darker(),Color.yellow},{Color.blue.darker().darker(),Color.blue.darker(),Color.blue}};
+		
+		g.setColor(colors[0][topLeft]);
+		g.fill(greenButton);
+		g.setColor(colors[1][topRight]);
+		g.fill(redButton);
+		g.setColor(colors[2][bottomLeft]);
+		g.fill(yellowButton);
+		g.setColor(colors[3][bottomRight]);
+		g.fill(blueButton);
 		//change these all to switch statements that paint a certain color based on their number, 0 for dark 1 for neutral and 2 for bright
-		if(topLeft==1) {
-			g.setColor(Color.green);
-			g.fillArc(125, 125-20, 275*2, 275*2, 90, 90);
-		}
-		if(topRight==1) {
-			g.setColor(Color.red);
-			g.fillArc(125, 125-20, 275*2, 275*2, 90, -90);
-		}
-		if(bottomLeft==1) {
-			g.setColor(Color.yellow);
-			g.fillArc(125, 125-20, 275*2, 275*2, 180, 90);
-		}
-		if(bottomRight==1) {
-			g.setColor(Color.blue);
-			g.fillArc(125, 125-20, 275*2, 275*2, -90, 90);
-		}
 		
 		
 		//black bars on end + inner circle
-		//maybe add a design to inner circle later
-		g.setColor(new Color(67,67,67));
-		g.fillRect(125+275-10, 125-20,20, 275*2);
-		g.fillRect(125, 125-10+275-20,275*2, 20);
-		g.fillOval(275, 275-20, 250, 250);
+		//maybe add a design to inner circle later	
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -71,14 +84,39 @@ public class Simon extends JPanel implements MouseListener{
 	@Override
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		Color c = (getColorAtPoint(e.getX(),e.getY()));
-		//check which of the 4 colors it is, if it is one of them set their respective variable to 0 for pressed and set currentClick to their value
+		
+		//check which of the 4 colors it is, 
+		//if it is one of them set their respective variable to 0 for pressed 
+		//and set currentClick to their value
+		if(greenButton.contains(getMousePosition())) {
+			topLeft=0;
+			currentClick=tl;
+		} else if(redButton.contains(getMousePosition())) {
+			topRight=0;
+			currentClick=tr;
+		} else if(yellowButton.contains(getMousePosition())) {
+			bottomLeft=0;
+			currentClick=bl;
+		} else if(blueButton.contains(getMousePosition())) {
+			bottomRight=0;
+			currentClick=br;
+		}
+		repaint();
+	}
+	void click(int loc) {
+
 	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		//if currentClick!=0 then count a click on a certain button
+		if(currentClick!=0) {
+				click(currentClick);
+		}
 		//set currentclick to 0
+		currentClick=0;
+		topLeft=topRight=bottomLeft=bottomRight=1;
+		repaint();
 	}
 	@Override
 	public void mouseEntered(MouseEvent e) {
@@ -89,14 +127,6 @@ public class Simon extends JPanel implements MouseListener{
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
-	}
-	Color getColorAtPoint(int x, int y) {
-		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
-		Graphics2D g2 = image.createGraphics();
-		paint(g2);
-		Color c = new Color(image.getRGB(x,y),true);
-		g2.dispose();
-		return c;
 	}
 	
 }
