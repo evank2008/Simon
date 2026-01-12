@@ -19,7 +19,7 @@ public class Simon extends JPanel implements MouseListener{
 	Area greenButton, redButton, yellowButton, blueButton, sub;
 	int topLeft=0,topRight=0,bottomLeft=0,bottomRight=0;
 	//0 for dark(pressed), 1 for neutral, 2 for lit up
-	public static int WIDTH=1000,HEIGHT=300;
+	public static int WIDTH=600,HEIGHT=600;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
 	boolean clickEnabled=false;
@@ -114,12 +114,21 @@ public class Simon extends JPanel implements MouseListener{
 	}
 	void click(int loc) {
 		if(sequence[clickProgress]!=loc) {
+			//you lose
 			topLeft=0;topRight=0;bottomLeft=0;bottomRight=0;
 			started=false;
 			clickEnabled=false;
 			repaint();
 		} else {
 			clickProgress++;
+			if(clickProgress==31) {
+				//you win!
+				topLeft=topRight=bottomLeft=bottomRight=2;
+				started=false;
+				clickEnabled=false;
+				repaint();
+				return;
+			}
 			if(clickProgress==currentLevel) {
 				//win this round
 				clickProgress=0;
@@ -129,7 +138,6 @@ public class Simon extends JPanel implements MouseListener{
 		}
 	}
 	void start() {
-		System.out.println("start");
 		started=true;
 		for(int i = 0; i<31;i++) {
 			sequence[i]=new Random().nextInt(4)+1;
