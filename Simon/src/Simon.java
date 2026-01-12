@@ -6,11 +6,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 import javax.swing.*;
 
 public class Simon extends JPanel implements MouseListener{
-
+	//TODO play sounds on flash/click?
+	Integer[] sequence = new Integer[31];
 	JFrame frame;
 	Area greenButton, redButton, yellowButton, blueButton, sub;
 	int topLeft=1,topRight=1,bottomLeft=1,bottomRight=1;
@@ -18,8 +22,9 @@ public class Simon extends JPanel implements MouseListener{
 	public static int WIDTH=600,HEIGHT=600;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
-	boolean clickEnabled=true;
+	boolean clickEnabled=false;
 	boolean started = false;
+	int currentLevel;
 	public static void main(String[] args) {
 		new Simon();
 	}
@@ -110,7 +115,67 @@ public class Simon extends JPanel implements MouseListener{
 
 	}
 	void start() {
+		System.out.println("start");
 		started=true;
+		for(int i = 0; i<31;i++) {
+			sequence[i]=new Random().nextInt(4)+1;
+		}
+		currentLevel=1;
+		showSequence(currentLevel);
+	}
+	void showSequence(int count) {
+		int[] i = {0};
+		boolean[] flashTime= {true};
+		Timer timer = new Timer(500,e->{
+			if(flashTime[0]) {
+				flash(sequence[i[0]]);
+			} else {
+				unflash(sequence[i[0]]);
+				i[0]++;
+			}
+			flashTime[0]=!flashTime[0];
+			if(i[0]>count-1) {
+				((Timer) e.getSource()).stop();
+			}
+			
+		});
+		timer.start();
+	}
+	void flash(int loc) {
+		//1 to 4
+		switch(loc) {
+		case tl:
+			topLeft=2;
+			break;
+		case tr:
+			topRight=2;
+			break;
+		case bl:
+			bottomLeft=2;
+			break;
+		case br: 
+			bottomRight=2;
+			break;
+		}
+		repaint();
+	}
+	void unflash(int loc) {
+
+		switch(loc) {
+		case tl:
+			topLeft=1;
+			break;
+		case tr:
+			topRight=1;
+			break;
+		case bl:
+			bottomLeft=1;
+			break;
+		case br: 
+			bottomRight=1;
+			break;
+		}
+		repaint();
 	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
