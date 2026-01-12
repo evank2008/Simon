@@ -18,6 +18,8 @@ public class Simon extends JPanel implements MouseListener{
 	public static int WIDTH=600,HEIGHT=600;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
+	boolean clickEnabled=true;
+	boolean started = false;
 	public static void main(String[] args) {
 		new Simon();
 	}
@@ -83,6 +85,7 @@ public class Simon extends JPanel implements MouseListener{
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if(!clickEnabled) return;
 		// TODO Auto-generated method stub
 		
 		//check which of the 4 colors it is, 
@@ -106,8 +109,21 @@ public class Simon extends JPanel implements MouseListener{
 	void click(int loc) {
 
 	}
+	void start() {
+		started=true;
+	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		if(!started) {
+			start();
+			return;
+		}
+		if(!clickEnabled) {
+			currentClick=0;
+			topLeft=topRight=bottomLeft=bottomRight=1;
+			repaint();
+			return;
+		}
 		// TODO Auto-generated method stub
 		//if currentClick!=0 then count a click on a certain button
 		if(currentClick!=0) {
