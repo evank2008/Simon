@@ -19,13 +19,15 @@ public class Simon extends JPanel implements MouseListener{
 	Area greenButton, redButton, yellowButton, blueButton, sub;
 	int topLeft=0,topRight=0,bottomLeft=0,bottomRight=0;
 	//0 for dark(pressed), 1 for neutral, 2 for lit up
-	public static int WIDTH=600,HEIGHT=600;
+	public static int WIDTH=1000,HEIGHT=600;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
 	boolean clickEnabled=false;
 	boolean started = false;
 	int currentLevel;
 	int clickProgress;
+	int highScore=-1;
+	JSlider slider;
 	public static void main(String[] args) {
 		new Simon();
 	}
@@ -60,6 +62,23 @@ public class Simon extends JPanel implements MouseListener{
 	    blueButton.subtract(sub);
 	    
 		addMouseListener(this);
+		slider = new JSlider(0,900,500);
+		slider.setBackground(new Color(36,36,36));
+		JPanel bufferPanel = new JPanel();
+		bufferPanel.setOpaque(false);
+		bufferPanel.setPreferredSize(new Dimension(WIDTH,HEIGHT*6/7));
+		slider.setPreferredSize(new Dimension(WIDTH/2,HEIGHT/20));
+		JLabel sneakyLabel = new JLabel("Speed");
+		sneakyLabel.setForeground(getBackground());
+		add(bufferPanel);
+		add(sneakyLabel);
+		
+		add(slider);
+		JLabel label = new JLabel("Speed");
+		
+		label.setForeground(Color.white);
+		add(label);
+		frame.paintAll(frame.getGraphics());
 	}
 	@Override
 	public void paintComponent(Graphics g1) {
@@ -78,11 +97,14 @@ public class Simon extends JPanel implements MouseListener{
 		g.fill(yellowButton);
 		g.setColor(colors[3][bottomRight]);
 		g.fill(blueButton);
-		//change these all to switch statements that paint a certain color based on their number, 0 for dark 1 for neutral and 2 for bright
 		
-		
-		//black bars on end + inner circle
-		//maybe add a design to inner circle later	
+		if(highScore!=-1) {
+			g.setColor(Color.white);
+			g.setFont(getFont().deriveFont(HEIGHT/18f));
+			//g.drawString("High Score: "+highScore, WIDTH/2-HEIGHT*5/36, HEIGHT*9/10);
+			g.drawString("High Score", WIDTH/40, HEIGHT/40+20);
+			g.drawString(""+highScore, WIDTH/40+HEIGHT*2/18, HEIGHT/40+20+HEIGHT/18+HEIGHT/40);
+		}
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -118,6 +140,8 @@ public class Simon extends JPanel implements MouseListener{
 			topLeft=0;topRight=0;bottomLeft=0;bottomRight=0;
 			started=false;
 			clickEnabled=false;
+			if(clickProgress>highScore) highScore=clickProgress;
+			if(currentLevel-1>highScore) highScore=currentLevel-1;
 			repaint();
 		} else {
 			clickProgress++;
@@ -126,6 +150,7 @@ public class Simon extends JPanel implements MouseListener{
 				topLeft=topRight=bottomLeft=bottomRight=2;
 				started=false;
 				clickEnabled=false;
+				highScore=-1;
 				repaint();
 				return;
 			}
@@ -150,9 +175,10 @@ public class Simon extends JPanel implements MouseListener{
 	}
 	void showSequence(int count) {
 		clickEnabled=false;
+		slider.setEnabled(false);
 		int[] i = {0};
 		boolean[] flashTime= {true};
-		Timer timer = new Timer(500,e->{
+		Timer timer = new Timer(1000-slider.getValue(),e->{
 			if(flashTime[0]) {
 				flash(sequence[i[0]]);
 			} else {
@@ -163,6 +189,7 @@ public class Simon extends JPanel implements MouseListener{
 			if(i[0]>count-1) {
 				clickEnabled=true;
 				((Timer) e.getSource()).stop();
+				slider.setEnabled(true);
 			}
 			
 		});
