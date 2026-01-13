@@ -19,7 +19,7 @@ public class Simon extends JPanel implements MouseListener{
 	Area greenButton, redButton, yellowButton, blueButton, sub;
 	int topLeft=0,topRight=0,bottomLeft=0,bottomRight=0;
 	//0 for dark(pressed), 1 for neutral, 2 for lit up
-	public static int WIDTH=1000,HEIGHT=600;
+	public static int WIDTH=600,HEIGHT=600;
 	int currentClick=0;
 	final int tl=1,tr=2,bl=3,br=4;
 	boolean clickEnabled=false;
