@@ -6,10 +6,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 
 public class Simon extends JPanel implements MouseListener{
@@ -28,6 +33,8 @@ public class Simon extends JPanel implements MouseListener{
 	int clickProgress;
 	int highScore=-1;
 	JSlider slider;
+	Clip redTone, blueTone, greenTone, yellowTone;
+	Clip[] sounds;
 	public static void main(String[] args) {
 		new Simon();
 	}
@@ -62,7 +69,7 @@ public class Simon extends JPanel implements MouseListener{
 	    blueButton.subtract(sub);
 	    
 		addMouseListener(this);
-		slider = new JSlider(0,900,500);
+		slider = new JSlider(0,850,500);
 		slider.setBackground(new Color(36,36,36));
 		JPanel bufferPanel = new JPanel();
 		bufferPanel.setOpaque(false);
@@ -79,7 +86,36 @@ public class Simon extends JPanel implements MouseListener{
 		label.setForeground(Color.white);
 		add(label);
 		frame.paintAll(frame.getGraphics());
+		
+		//load sounds
+		redTone=loadClip("Simon/src/red.wav");
+		blueTone=loadClip("Simon/src/blue.wav");
+		yellowTone=loadClip("Simon/src/yellow.wav");
+		greenTone=loadClip("Simon/src/green.wav");
+		
+		sounds = new Clip[]{greenTone,redTone,yellowTone,blueTone};
+			for(Clip c: sounds) {
+				c.setFramePosition(c.getFrameLength()-2);
+				c.start();
+				
+			}
+		
 	}
+	Clip loadClip(String path) {
+        try {
+        	File file = new File(path);
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            System.out.println("loaded");
+            return clip;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 	@Override
 	public void paintComponent(Graphics g1) {
 		super.paintComponent(g1);
@@ -211,6 +247,9 @@ public class Simon extends JPanel implements MouseListener{
 			bottomRight=2;
 			break;
 		}
+		sounds[loc-1].stop();
+		sounds[loc-1].setFramePosition(0);
+		sounds[loc-1].start();
 		repaint();
 	}
 	void unflash(int loc) {
